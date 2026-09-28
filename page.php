@@ -22,7 +22,7 @@ if (!$page) {
     exit;
 }
 
-// Sirf About page ke liye extra sections
+// Sirf About page ke liye mission/vision
  $mission_items = ($slug === 'about')
     ? $pdo->query("SELECT * FROM mission_vision ORDER BY sort_order ASC")->fetchAll()
     : [];
@@ -48,14 +48,14 @@ if (!$page) {
 <section class="section">
     <div class="container">
         <div class="prose">
-            <?= $page['content'] // Admin ka apna content hai, HTML allowed ?>
+            <?= $page['content'] ?>
         </div>
     </div>
 </section>
 
 <?php if ($slug === 'about'): ?>
 
-<!-- ===== MISSION / VISION / VALUES (sirf About pe) ===== -->
+<!-- ===== MISSION / VISION / VALUES ===== -->
 <section class="section bg-light">
     <div class="container">
         <p class="section-tag center">WHAT WE STAND FOR</p>
@@ -72,21 +72,48 @@ if (!$page) {
     </div>
 </section>
 
-<!-- ===== PRINCIPAL MESSAGE FULL (sirf About pe) ===== -->
+<!-- ===== FACILITIES (About ke andar) ===== -->
 <section class="section">
     <div class="container">
-        <p class="section-tag center">OUR LEADER</p>
-        <h2 class="section-title center">Message from the Principal</h2>
-        <?php $principal = getPrincipalMessage($pdo); ?>
-        <div class="principal-card" style="max-width:900px; margin:0 auto;">
-            <img src="<?= e($principal['photo']) ?>" alt="Principal" class="principal-photo">
-            <div class="principal-content">
-                <p><?= nl2br(e($principal['message'])) ?></p>
-                <p class="principal-name">— <?= e($principal['name']) ?>, <?= e($settings['school_name']) ?></p>
+        <p class="section-tag center">OUR FACILITIES</p>
+        <h2 class="section-title center">A Safe, Modern and Enriching Campus</h2>
+        <div class="facilities-grid about-facilities">
+            <?php foreach (getFacilities($pdo) as $f): ?>
+            <div class="facility-item">
+                <i class="fas <?= e($f['icon']) ?>"></i>
+                <p><?= e($f['title']) ?></p>
             </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
+
+<?php endif; ?>
+
+<?php if ($slug === 'administration'): $all_msgs = getAllMessages($pdo); ?>
+
+<!-- ===== ADMINISTRATION: ALL MESSAGES ===== -->
+<section class="section bg-light">
+    <div class="container">
+        <?php if (empty($all_msgs)): ?>
+        <p style="text-align:center;">Abhi koi message add nahi hua hai.</p>
+        <?php endif; ?>
+        <div class="messages-grid">
+            <?php foreach ($all_msgs as $m): ?>
+            <div class="principal-card">
+                <img src="<?= e($m['photo']) ?>" alt="<?= e($m['designation']) ?>" class="principal-photo">
+                <div class="principal-content">
+                    <p class="section-tag"><?= strtoupper(e($m['designation'])) ?></p>
+                    <h3><?= e($m['designation']) ?>'s Message</h3>
+                    <p><?= nl2br(e($m['message'])) ?></p>
+                    <p class="principal-name">— <?= e($m['name'] ?: $m['designation']) ?></p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
 <?php endif; ?>
 
 <?php require_once 'includes/footer.php'; ?>

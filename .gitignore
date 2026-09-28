@@ -1,0 +1,16 @@
+# Database / environment
+config/db.php
+config/mail.php
+
+# Runtime uploads
+uploads/*
+!uploads/.gitkeep
+
+# Local archives
+*.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

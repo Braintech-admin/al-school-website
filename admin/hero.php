@@ -12,47 +12,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_slide'])) {
             ->execute([$_POST['small_text'], $_POST['title_line1'], $_POST['title_line2'], $_POST['subtitle'],
                        $_POST['btn1_text'], $_POST['btn1_link'], $_POST['btn2_text'], $_POST['btn2_link'],
                        $image, (int)$_POST['sort_order']]);
-        $success = "Slide added successfully!";
-    } else {
-        $error = "Image upload failed! (jpg/png/webp, max 5MB)";
+        header('Location: hero.php?added=1');   // redirect — refresh pe duplicate nahi banega
+        exit;
     }
+    $error = "Image upload failed! (jpg/png/webp, max 5MB)";
 }
 
 // ===== UPDATE SLIDE =====
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_slide'])) {
-    $image = !empty($_FILES['image']['name']) ? uploadImage($_FILES['image'], '../uploads/') : $_POST['current_image'];
+    $new_image = !empty($_FILES['image']['name']) ? uploadImage($_FILES['image'], '../uploads/') : null;
+
+    // Nayi image aayi to purani file disk se delete karo (space waste na ho)
+    if ($new_image && !empty($_POST['current_image'])) {
+        $old = '../' . $_POST['current_image'];
+        if (file_exists($old)) unlink($old);
+    }
+
     $pdo->prepare("UPDATE hero_slides SET small_text=?, title_line1=?, title_line2=?, subtitle=?, btn1_text=?, btn1_link=?, btn2_text=?, btn2_link=?, image=?, sort_order=?, status=? WHERE id=?")
         ->execute([$_POST['small_text'], $_POST['title_line1'], $_POST['title_line2'], $_POST['subtitle'],
                    $_POST['btn1_text'], $_POST['btn1_link'], $_POST['btn2_text'], $_POST['btn2_link'],
-                   $image, (int)$_POST['sort_order'], isset($_POST['status']) ? 1 : 0, (int)$_POST['id']]);
+                   $new_image ?: $_POST['current_image'], (int)$_POST['sort_order'],
+                   isset($_POST['status']) ? 1 : 0, (int)$_POST['id']]);
     header('Location: hero.php?updated=1');
     exit;
 }
 
-// ===== DELETE =====
+// ===== DELETE (file bhi delete hogi) =====
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("SELECT image FROM hero_slides WHERE id = ?");
-    $stmt->execute([$_GET['delete']]);
+    $stmt->execute([(int)$_GET['delete']]);
     $img = $stmt->fetchColumn();
     if ($img && file_exists('../' . $img)) unlink('../' . $img);
-    $pdo->prepare("DELETE FROM hero_slides WHERE id = ?")->execute([$_GET['delete']]);
-    header('Location: hero.php');
-    exit;
+    $pdo->prepare("DELETE FROM hero_slides WHERE id = ?")->execute([(int)$_GET['delete']]);
+    header('Location: hero.php'); exit;
 }
 
 // ===== TOGGLE SHOW/HIDE =====
 if (isset($_GET['toggle'])) {
     $pdo->prepare("UPDATE hero_slides SET status = 1 - status WHERE id = ?")->execute([(int)$_GET['toggle']]);
-    header('Location: hero.php');
-    exit;
+    header('Location: hero.php'); exit;
 }
 
+// ===== EDIT MODE =====
  $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM hero_slides WHERE id = ?");
-    $stmt->execute([$_GET['edit']]);
+    $stmt->execute([(int)$_GET['edit']]);
     $editing = $stmt->fetch();
 }
+
  $slides = $pdo->query("SELECT * FROM hero_slides ORDER BY sort_order ASC")->fetchAll();
  $f = fn($key, $default = '') => e($editing[$key] ?? $default);
 ?>
@@ -66,10 +74,12 @@ if (isset($_GET['edit'])) {
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="main">
+        <?php include 'topbar.php'; ?>
+
         <h2 class="page-title"><i class="fas fa-image"></i> Hero Banners (Slider)</h2>
 
+        <?php if (isset($_GET['added'])) echo "<div class='alert-success'><i class='fas fa-check'></i> Slide added successfully!</div>"; ?>
         <?php if (isset($_GET['updated'])) echo "<div class='alert-success'><i class='fas fa-check'></i> Slide updated!</div>"; ?>
-        <?php if (!empty($success)) echo "<div class='alert-success'><i class='fas fa-check'></i> $success</div>"; ?>
         <?php if (!empty($error)) echo "<div class='alert-error'><i class='fas fa-exclamation-triangle'></i> $error</div>"; ?>
 
         <!-- Add/Edit Form -->
@@ -78,7 +88,7 @@ if (isset($_GET['edit'])) {
             <form method="POST" enctype="multipart/form-data">
                 <?php if ($editing): ?>
                     <input type="hidden" name="update_slide" value="1">
-                    <input type="hidden" name="id" value="<?= $editing['id'] ?>">
+                    <input type="hidden" name="id" value="<?= (int)$editing['id'] ?>">
                     <input type="hidden" name="current_image" value="<?= e($editing['image']) ?>">
                 <?php else: ?>
                     <input type="hidden" name="add_slide" value="1">
@@ -129,10 +139,14 @@ if (isset($_GET['edit'])) {
                 <label>Background Image (1600×600 recommended <?= $editing ? '— khali chhodo to purani rahegi' : '' ?>)</label>
                 <input type="file" name="image" accept="image/*" <?= $editing ? '' : 'required' ?>>
                 <?php if ($editing): ?>
-                    <label style="margin-top:10px;"><input type="checkbox" name="status" value="1" <?= $editing['status'] ? 'checked' : '' ?> style="width:auto;"> Visible on website</label>
+                <div style="margin:10px 0;">
+                    <img src="../<?= e($editing['image']) ?>" style="width:200px; height:80px; object-fit:cover; border-radius:8px; border:2px solid #eee;" alt="Current">
+                </div>
+                <label><input type="checkbox" name="status" value="1" <?= $editing['status'] ? 'checked' : '' ?> style="width:auto;"> Visible on website</label>
                 <?php endif; ?>
                 <button type="submit" class="btn btn-add" style="margin-top:15px;">
-                    <i class="fas fa-save"></i> <?= $editing ? 'Update Slide' : 'Add Slide' ?>
+                    <i class="fas fa-<?= $editing ? 'save' : 'plus' ?>"></i>
+                    <?= $editing ? 'Update Slide' : 'Add Slide' ?>
                 </button>
                 <?php if ($editing): ?>
                     <a href="hero.php" class="btn" style="background:#64748b; color:#fff; margin-left:10px;">Cancel</a>
@@ -145,21 +159,24 @@ if (isset($_GET['edit'])) {
             <tr><th>#</th><th>Preview</th><th>Title</th><th>Sort</th><th>Status</th><th>Action</th></tr>
             <?php foreach ($slides as $s): ?>
             <tr>
-                <td><?= $s['id'] ?></td>
+                <td><?= (int)$s['id'] ?></td>
                 <td><img src="../<?= e($s['image']) ?>" style="width:110px; height:55px; object-fit:cover; border-radius:6px;" alt=""></td>
                 <td><?= e($s['title_line1']) ?> <?= $s['title_line2'] ? '<br><small style="color:#f97316;">' . e($s['title_line2']) . '</small>' : '' ?></td>
                 <td><?= (int)$s['sort_order'] ?></td>
                 <td>
-                    <a href="?toggle=<?= $s['id'] ?>" style="text-decoration:none; font-weight:600; color: <?= $s['status'] ? 'green' : '#999' ?>;">
+                    <a href="?toggle=<?= (int)$s['id'] ?>" style="text-decoration:none; font-weight:600; color: <?= $s['status'] ? 'green' : '#999' ?>;">
                         <?= $s['status'] ? '● Visible' : '○ Hidden' ?>
                     </a>
                 </td>
                 <td>
-                    <a class="btn" style="background:#0f2a5c; color:#fff;" href="?edit=<?= $s['id'] ?>"><i class="fas fa-edit"></i></a>
-                    <a class="btn btn-del" href="?delete=<?= $s['id'] ?>" onclick="return confirm('Delete this slide?')"><i class="fas fa-trash"></i></a>
+                    <a class="btn" style="background:#0f2a5c; color:#fff;" href="?edit=<?= (int)$s['id'] ?>"><i class="fas fa-edit"></i></a>
+                    <a class="btn btn-del" href="?delete=<?= (int)$s['id'] ?>" onclick="return confirm('Delete this slide?')"><i class="fas fa-trash"></i></a>
                 </td>
             </tr>
             <?php endforeach; ?>
+            <?php if (empty($slides)): ?>
+            <tr><td colspan="6" style="text-align:center; color:#999; padding:30px;">Koi slide nahi — upar se pehla banner add karo!</td></tr>
+            <?php endif; ?>
         </table>
     </div>
 </body>

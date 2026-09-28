@@ -1,56 +1,58 @@
 <?php
+/**
+ * A.L. Convent School & Girls' College Website
+ *
+ * Copyright © 2026 Braintech IT Services.
+ * All rights reserved.
+ *
+ * This source code is proprietary.
+ * Unauthorized copying, reproduction, modification,
+ * redistribution or commercial use is prohibited
+ * without prior written permission.
+ */
 require_once 'includes/header.php';
 
- $stats       = getStats($pdo);
- $about       = getAbout($pdo);
- $programs    = getPrograms($pdo);
- $facilities  = getFacilities($pdo);
- $principal   = getPrincipalMessage($pdo);
- $news        = getLatestNews($pdo, 3);
- $gallery     = getGallery($pdo, 6);
+ $slides     = $pdo->query("SELECT * FROM hero_slides WHERE status = 1 ORDER BY sort_order ASC")->fetchAll();
+ $stats      = getStats($pdo);
+ $about      = getAbout($pdo);
+ $programs   = getPrograms($pdo);
+ $facilities = getFacilities($pdo);
+ $messages   = getHomeMessages($pdo);
+ $news       = getLatestNews($pdo, 3);
+$albums      = getAlbums($pdo);
 ?>
 
 <!-- ===== HERO SLIDER ===== -->
-<?php $slides = $pdo->query("SELECT * FROM hero_slides WHERE status = 1 ORDER BY sort_order ASC")->fetchAll(); ?>
-
 <section class="hero-slider">
-    <?php if (empty($slides)): ?>
-    <div class="hero-slide active" style="background: linear-gradient(rgba(10,25,60,.75), rgba(10,25,60,.75)), url('uploads/hero.jpg') center/cover;">
+    <?php foreach ($slides as $i => $s): ?>
+    <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>" style="background: linear-gradient(rgba(10,25,60,.75), rgba(10,25,60,.75)), url('<?= e($s['image']) ?>') center/cover;">
         <div class="container hero-content">
-            <h2>Welcome to <?= e($settings['school_name']) ?></h2>
-        </div>
-    </div>
-    <?php else: ?>
-        <?php foreach ($slides as $i => $s): ?>
-        <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>" style="background: linear-gradient(rgba(10,25,60,.75), rgba(10,25,60,.75)), url('<?= e($s['image']) ?>') center/cover;">
-            <div class="container hero-content">
-                <?php if ($s['small_text']): ?>
-                <p class="hero-welcome"><?= e($s['small_text']) ?> <span class="line"></span></p>
+            <?php if ($s['small_text']): ?>
+            <p class="hero-welcome"><?= e($s['small_text']) ?> <span class="line"></span></p>
+            <?php endif; ?>
+            <h2>
+                <?= e($s['title_line1']) ?>
+                <?php if ($s['title_line2']): ?><br><span class="accent"><?= e($s['title_line2']) ?></span><?php endif; ?>
+            </h2>
+            <?php if ($s['subtitle']): ?><p class="hero-sub"><?= e($s['subtitle']) ?></p><?php endif; ?>
+            <div class="hero-btns">
+                <?php if ($s['btn1_text']): ?>
+                <a href="<?= e($s['btn1_link']) ?>" class="btn btn-orange"><?= e($s['btn1_text']) ?> <i class="fas fa-arrow-right"></i></a>
                 <?php endif; ?>
-                <h2>
-                    <?= e($s['title_line1']) ?>
-                    <?php if ($s['title_line2']): ?><br><span class="accent"><?= e($s['title_line2']) ?></span><?php endif; ?>
-                </h2>
-                <?php if ($s['subtitle']): ?><p class="hero-sub"><?= e($s['subtitle']) ?></p><?php endif; ?>
-                <div class="hero-btns">
-                    <?php if ($s['btn1_text']): ?>
-                    <a href="<?= e($s['btn1_link']) ?>" class="btn btn-orange"><?= e($s['btn1_text']) ?> <i class="fas fa-arrow-right"></i></a>
-                    <?php endif; ?>
-                    <?php if ($s['btn2_text']): ?>
-                    <a href="<?= e($s['btn2_link']) ?>" class="btn btn-outline"><?= e($s['btn2_text']) ?> <i class="fas fa-arrow-right"></i></a>
-                    <?php endif; ?>
-                </div>
+                <?php if ($s['btn2_text']): ?>
+                <a href="<?= e($s['btn2_link']) ?>" class="btn btn-outline"><?= e($s['btn2_text']) ?> <i class="fas fa-arrow-right"></i></a>
+                <?php endif; ?>
             </div>
         </div>
-        <?php endforeach; ?>
+    </div>
+    <?php endforeach; ?>
 
-        <?php if (count($slides) > 1): ?>
-        <div class="hero-dots">
-            <?php foreach ($slides as $i => $s): ?>
-            <span class="<?= $i === 0 ? 'active' : '' ?>"></span>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
+    <?php if (count($slides) > 1): ?>
+    <div class="hero-dots">
+        <?php foreach ($slides as $i => $s): ?>
+        <span class="<?= $i === 0 ? 'active' : '' ?>"></span>
+        <?php endforeach; ?>
+    </div>
     <?php endif; ?>
 </section>
 
@@ -124,13 +126,12 @@ if (heroSlides.length > 1) {
     </div>
 </section>
 
-<!-- ===== ACADEMICS / PROGRAMS ===== -->
+<!-- ===== ACADEMICS ===== -->
 <section class="academics section bg-light">
     <div class="container">
         <p class="section-tag center">ACADEMICS</p>
         <h2 class="section-title center">Programs for a Brighter Tomorrow</h2>
         <p class="section-sub center">We offer a structured and enriching academic curriculum designed to bring out the best in every student.</p>
-        
         <div class="programs-grid">
             <?php foreach ($programs as $p): ?>
             <div class="program-card">
@@ -150,7 +151,6 @@ if (heroSlides.length > 1) {
     <div class="container">
         <p class="section-tag center">OUR FACILITIES</p>
         <h2 class="section-title center">A Safe, Modern and Enriching Campus</h2>
-        
         <div class="facilities-grid">
             <?php foreach ($facilities as $f): ?>
             <div class="facility-item">
@@ -162,60 +162,70 @@ if (heroSlides.length > 1) {
     </div>
 </section>
 
-<!-- ===== PRINCIPAL + NEWS ===== -->
+<!-- ===== MESSAGES + NEWS ===== -->
 <section class="principal-news section bg-light">
-    <div class="container pn-grid">
-        <!-- Principal -->
-        <div class="principal-card">
-            <img src="<?= e($principal['photo']) ?>" alt="Principal" class="principal-photo">
-            <div class="principal-content">
-                <p class="section-tag">OUR LEADER</p>
-                <h3>Message from the Principal</h3>
-                <p><?= nl2br(e($principal['message'])) ?></p>
-                <p class="principal-name">— <?= e($principal['name']) ?></p>
-                <a href="page.php?slug=about" class="btn btn-orange">Read Full Message <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
+    <div class="container">
 
-        <!-- News & Events -->
-        <div class="news-card">
-            <div class="news-header">
-                <h3>Latest News & Events</h3>
-                <a href="page.php?slug=news" class="view-all">View All</a>
-            </div>
-            <?php foreach ($news as $n): ?>
-            <div class="news-item">
-                <div class="news-date">
-                    <span class="day"><?= date('d', strtotime($n['event_date'])) ?></span>
-                    <span class="month"><?= date('M', strtotime($n['event_date'])) ?></span>
+        <div class="messages-grid">
+            <?php foreach ($messages as $m): ?>
+            <div class="principal-card">
+                <img src="<?= e($m['photo']) ?>" alt="<?= e($m['designation']) ?>" class="principal-photo">
+                <div class="principal-content">
+                    <p class="section-tag">FROM THE DESK</p>
+                    <h3><?= e($m['designation']) ?>'s Message</h3>
+                    <p class="msg-excerpt"><?= nl2br(e($m['message'])) ?></p>
+                    <p class="principal-name">— <?= e($m['name'] ?: $m['designation']) ?></p>
+                    <a href="page.php?slug=administration" class="btn btn-orange">Read Full Message <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <div class="news-info">
-                    <h4><?= e($n['title']) ?></h4>
-                    <p><?= e($n['description']) ?></p>
-                </div>
-                <i class="fas fa-chevron-right"></i>
             </div>
             <?php endforeach; ?>
         </div>
+
+        <div class="news-card" style="margin-top:30px;">
+            <div class="news-header">
+                <h3>Latest News & Events</h3>
+                <a href="news.php" class="view-all">View All</a>
+            </div>
+            <div class="news-grid">
+                <?php foreach ($news as $n): ?>
+                <div class="news-item" onclick="location='news.php?id=<?= $n['id'] ?>'" style="cursor:pointer;">
+                    <div class="news-date">
+                        <span class="day"><?= date('d', strtotime($n['event_date'])) ?></span>
+                        <span class="month"><?= date('M', strtotime($n['event_date'])) ?></span>
+                    </div>
+                    <div class="news-info">
+                        <h4><?= e($n['title']) ?></h4>
+                        <p><?= e($n['description']) ?></p>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
     </div>
 </section>
 
-<!-- ===== GALLERY ===== -->
+<!-- ===== GALLERY ALBUMS ===== -->
 <section class="gallery section">
     <div class="container">
         <p class="section-tag center">PHOTO GALLERY</p>
         <h2 class="section-title center">Moments That Inspire</h2>
-        
-        <div class="gallery-grid">
-            <?php foreach ($gallery as $g): ?>
-            <div class="gallery-item">
-                <img src="<?= e($g['image']) ?>" alt="<?= e($g['title']) ?>">
-                <div class="gallery-overlay"><p><?= e($g['title']) ?></p></div>
-            </div>
+        <div class="albums-grid home-albums">
+            <?php foreach (array_slice($albums, 0, 4) as $a): ?>
+            <a href="gallery.php?album=<?= $a['id'] ?>" class="album-card">
+                <div class="album-cover">
+                    <img src="<?= e($a['display_image'] ?: 'uploads/hero.jpg') ?>" alt="<?= e($a['name']) ?>">
+                    <div class="album-count"><i class="fas fa-camera"></i> <?= (int)$a['photo_count'] ?> Photos</div>
+                </div>
+                <div class="album-name">
+                    <h3><?= e($a['name']) ?></h3>
+                    <span>View Album <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
             <?php endforeach; ?>
-            <div style="text-align:center; margin-top:35px;">
-    <a href="gallery.php" class="btn btn-orange">View Full Gallery <i class="fas fa-arrow-right"></i></a>
-</div>
+        </div>
+        <div style="text-align:center; margin-top:35px;">
+            <a href="gallery.php" class="btn btn-orange">View Full Gallery <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>
 </section>

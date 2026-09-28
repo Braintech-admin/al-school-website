@@ -1,27 +1,227 @@
+/* ============================================================
+   ADMIN PANEL STYLESHEET — Cleaned & Organized
+   Structure: Base > Sidebar > Content > Tables > Forms >
+              Buttons > Topbar > Notices > Sidebar Card > Responsive
+   ============================================================ */
+
+/* ============ BASE ============ */
 * { box-sizing: border-box; }
-body { font-family: 'Poppins', sans-serif; margin: 0; background: #f0f4fa; display: flex; }
-.sidebar { width: 230px; background: #0f2a5c; min-height: 100vh; padding: 20px 0; flex-shrink: 0; }
-.sidebar-brand { color: #fff; font-weight: 700; font-size: 18px; padding: 0 25px 20px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 10px; }
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background: #f0f4fa;
+    display: flex;
+    padding-top: 54px;   /* fixed topbar ki jagah */
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+    width: 230px;
+    background: #0f2a5c;
+    min-height: calc(100vh - 54px);
+    padding: 20px 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+.sidebar-brand {
+    color: #fff;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 0 25px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    margin-bottom: 10px;
+}
 .sidebar-brand span { color: #f97316; }
-.sidebar a { display: block; color: #cbd5e1; padding: 13px 25px; text-decoration: none; font-size: 15px; }
+.sidebar-brand small { font-weight: 400; }
+.sidebar a {
+    display: block;
+    color: #cbd5e1;
+    padding: 13px 25px;
+    text-decoration: none;
+    font-size: 15px;
+    transition: .2s;
+}
 .sidebar a i { width: 22px; }
 .sidebar a:hover, .sidebar a.active { background: #f97316; color: #fff; }
-.main { flex: 1; padding: 30px; }
+.sidebar-divider {
+    color: #64748b;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 15px 25px 6px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    margin-top: 12px;
+}
+
+/* ============ SIDEBAR BRAINTECH LOGO CARD ============ */
+.bt-sidebar-card {
+    display: block;
+    margin: auto 8px 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    line-height: 0;                /* image ke neeche gap hatane ke liye */
+    overflow: hidden;
+}
+.bt-sidebar-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.35);   /* halka dark shadow — no color */
+}
+.bt-card-logo {
+    display: block;
+    margin: 0;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+}
+.bt-card-fallback {
+    font-weight: 800; font-size: 18px; color: #0f2a5c;
+    line-height: 1.4;
+}
+.bt-card-fallback b { color: #f97316; }
+
+/* ============ MAIN CONTENT ============ */
+.main { flex: 1; padding: 25px 30px; min-width: 0; }
 .page-title { color: #0f2a5c; margin: 0 0 20px; }
-table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,.08); }
+
+/* ============ TABLES ============ */
+table {
+    width: 100%;
+    background: #fff;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
 th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
 th { background: #0f2a5c; color: #fff; }
 td img { width: 70px; height: 50px; object-fit: cover; border-radius: 6px; }
-.btn { padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; border: none; cursor: pointer; }
-.btn-del { background: #dc2626; color: #fff; }
-.btn-add { background: #f97316; color: #fff; padding: 12px 24px; }
-input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
-.form-box { background: #fff; padding: 25px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 3px 12px rgba(0,0,0,.08); }
+
+/* ============ FORMS ============ */
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+textarea { margin-bottom: 12px; resize: vertical; }
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+}
+label { font-size: 14px; font-weight: 500; color: #0f2a5c; display: block; margin-bottom: 6px; }
+.form-box {
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
 .form-box h3 { color: #0f2a5c; margin-top: 0; }
-.form-row { display: flex; gap: 15px; }
-.form-row > div { flex: 1; }
+.form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+.form-row > div { flex: 1; min-width: 200px; }
+
+/* ============ BUTTONS & ALERTS ============ */
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    transition: .2s;
+}
+.btn-del { background: #dc2626; color: #fff; }
+.btn-del:hover { background: #b91c1c; }
+.btn-add { background: #f97316; color: #fff; padding: 12px 24px; }
+.btn-add:hover { background: #ea580c; }
 .alert-success { background: #dcfce7; color: #16a34a; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
 .alert-error { background: #fee2e2; color: #dc2626; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
-textarea { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
-select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
-label { font-size: 14px; font-weight: 500; color: #0f2a5c; display: block; }
+
+/* TinyMCE editor */
+.tox-tinymce { border-radius: 6px; margin-bottom: 12px; }
+
+/* ============ ADMIN TOPBAR (Fixed, Braintech Branding) ============ */
+.admin-topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 54px;
+    background: #0a1f47;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; z-index: 2000;
+    box-shadow: 0 2px 12px rgba(0,0,0,.35);
+}
+.atb-left { display: flex; align-items: center; gap: 14px; }
+.atb-brand { display: flex; align-items: center; text-decoration: none; }
+.atb-brand-img { height: 38px; width: auto; display: block; }
+.atb-sep { width: 1px; height: 24px; background: rgba(255,255,255,.18); }
+.atb-panel-name { color: #94a3b8; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
+.atb-panel-name i { color: #f97316; font-size: 12px; }
+
+.atb-right { display: flex; align-items: center; gap: 12px; }
+.atb-school-name {
+    color: #94a3b8; font-size: 13px; max-width: 280px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.atb-school-name i { color: #f97316; margin-right: 4px; }
+.atb-admin-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.08); color: #e2e8f0;
+    font-size: 13px; font-weight: 600;
+    padding: 7px 15px; border-radius: 30px;
+    white-space: nowrap;
+}
+.atb-admin-chip i { color: #f97316; }
+.atb-btn {
+    color: #cbd5e1; text-decoration: none; font-size: 13px;
+    padding: 7px 14px; border-radius: 6px;
+    background: rgba(255,255,255,.08);
+    transition: .2s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.atb-btn:hover { background: #f97316; color: #fff; }
+.atb-danger:hover { background: #dc2626; }
+
+/* ============ NOTICE BANNER (Dashboard) ============ */
+.notice-banner {
+    background: #fff7ed; border: 2px solid #f97316; border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 22px;
+    animation: bannerPulse 2s infinite;
+}
+@keyframes bannerPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,.35); }
+    50%     { box-shadow: 0 0 0 10px rgba(249,115,22,0); }
+}
+.notice-banner h4 { color: #c2410c; margin: 0 0 10px; }
+.notice-banner ul { margin: 0 0 14px; padding-left: 20px; font-size: 14px; color: #7c2d12; }
+.notice-banner li { margin-bottom: 6px; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 992px) {
+    .main { padding: 20px; }
+}
+
+@media (max-width: 768px) {
+    /* Topbar: sirf zaroori cheezein */
+    .atb-school-name, .atb-panel-name, .atb-sep, .atb-admin-chip { display: none; }
+    .atb-btn span { display: none; }
+
+    /* Sidebar: icon-only collapse */
+    .sidebar { width: 58px; padding: 15px 0; }
+    .sidebar-brand { font-size: 0; padding: 0 0 15px; text-align: center; }
+    .sidebar-brand small { font-size: 0; }
+    .sidebar a { font-size: 0; padding: 14px 0; text-align: center; }
+    .sidebar a i { width: auto; font-size: 17px; }
+    .sidebar-divider { font-size: 0; padding: 8px 0; border-top: none; }
+    .sidebar-divider::after { content: '···'; font-size: 14px; color: #64748b; }
+
+        /* Braintech card compact */
+    .bt-sidebar-card { margin: auto 6px 12px; padding: 8px; }
+    .bt-card-logo { max-height: 40px; width: auto !important; max-width: 100% !important; }
+
+    /* Tables horizontal scroll */
+    .main { overflow-x: auto; }
+    table { min-width: 600px; }
+}
